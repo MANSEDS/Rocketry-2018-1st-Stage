@@ -6,4 +6,31 @@
 
 */
 
+/// Global Variables
+string target_location = "";
+
+
+
+
+/// GPS & GLONASS Data Acquisition
+/// Matthew
+
+
+/// IMU Data Acquisition
+/// Ethan 
+
+
+/// Kalman Filtering
+/// Ben 
+/// Output filter_data object 
+
+/// Difference function
+/// 
+
+/// PID Control
+/// 
+
+/// Actuator Control
+/// Ethan
+
 return 0
