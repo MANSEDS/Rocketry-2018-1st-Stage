@@ -15,6 +15,9 @@ string target_location = "";
 /// GPS & GLONASS Data Acquisition
 /// Matthew
 
+/// A program that reads in GPS Data and pushes out a textfile in CSV.
+/// Connect GPS Reciever Transmittion Pin(TX) to Micro-Controller Receiver Pin(RX)
+
 /// Read in data in NMEA format, Time in GMT "123456.123,A" Longitude "123456.1234,N"   Latitude "123456.1234,W"
 /// Quality "1"   # of satalites "09"   HDOP "1.6"   Altitude "7000.6"
 /// std::string GPS_Data = "$GPRMC,123456.123,A,123456.1234,N,123456.1234,W,1,09,1.6,7000.6,M,-20.7,M,234,10000*20
