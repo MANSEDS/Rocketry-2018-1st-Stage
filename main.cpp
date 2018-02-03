@@ -55,20 +55,27 @@ double distance(double lat1, double lon1, double lat2, double lon2) {
     return d;
 }
 
+/// Outputs GPS & GLONASS objects
+
 
 /// IMU Data Acquisition
 /// Ethan 
+/// Outputs IMU objects
 
 
 /// Kalman Filtering
 /// Ben 
+/// Inputs IMU & GPS/GLONASS data
 /// Output filter_data object 
 
 /// Difference function
-/// 
+/// Oscar
+/// Input location data (initially GPS & GLONASS, eventually filtered_data), target location
+/// Output PI_error object 
 
 /// PID Control
 /// 
+/// Input PI_error object
 
 /// Actuator Control
 /// Ethan
