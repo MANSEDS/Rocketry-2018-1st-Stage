@@ -18,34 +18,27 @@ string target_location = "";
 /// A program that reads in GPS Data and pushes out a textfile in CSV.
 /// Connect GPS Reciever Transmittion Pin(TX) to Micro-Controller Receiver Pin(RX)
 
-/// Read in data in NMEA format, Time in GMT "123456.123,A" Longitude "123456.1234,N"   Latitude "123456.1234,W"
+//// Read in data in NMEA format, Time in GMT "123456.123,A" Longitude "123456.1234,N"   Latitude "123456.1234,W"
 /// Quality "1"   # of satalites "09"   HDOP "1.6"   Altitude "7000.6"
 /// std::string GPS_Data = "$GPRMC,123456.123,A,123456.1234,N,123456.1234,W,1,09,1.6,7000.6,M,-20.7,M,234,10000*20
 
-std::ofstream GPS_Data;
-GPS_Data.open ("GPS_Data.txt");
-GPS GPS1("GPS1");
-std::string GPS_data = "Stream GPS data into here";
 
-int x = 0;
-int readcount = 100;
-
-/// loop data calling Proto-call
-while (x <= readcount) {
-
-    /// add time delay, operating environment specific
-
-    /// stream gps data into the gps object
-    GPS1.data_in(GPS_data);
-    /// redundant step, to show how to call gps data
-    std::string data = GPS1.GPS_Call();
-    /// seperate each line with ;
-    GPS_Data << data + ";";
-    x +=1;
+/// Example code for pulling data
+int main() {
+    APS APS1("GPS");
+    std::string GPS_data = "$GPRMC,123456.123,A,123456.1234,N,123456.1234,W,1,09,1.6,7000.6,M,-20.7,M,234,10000*20";
+    APS1.GPS_data_in(GPS_data);
+    double output1 = APS1.get_GPS_time();
+    printf("%.4f\n", output1);
+    double output2 = APS1.get_GPS_lat();
+    printf("%.4f\n", output2);
+    double output3 = APS1.get_GPS_lon();
+    printf("%.4f\n", output3);
+    double output4 = APS1.get_GPS_alt();
+    printf("%.4f\n", output4);
+    return 0;
 }
 
-/// End data updates
-GPS_Data.close();
 
 /// a function that calculates distance between two points on a sphere
 double distance(double lat1, double lon1, double lat2, double lon2) {
