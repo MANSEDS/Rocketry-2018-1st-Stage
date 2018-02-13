@@ -118,7 +118,7 @@ public:
     /* To get velocity error, multiple routes. Potentially: sample two differences over an interval (yet to decide its length)
     and subtract. Constructor Pi_Error object as per location class' layout.*/
     double rawDifference = sqrt (pow(difference.lat, 2) + pow(difference.longi, 2));
-    double velocityError = 2 * IMUAcceleration * rawDifference;
+    double velocityError = sqrt(pow(initialVelocity, 2) + 2 * IMUAcceleration * rawDifference);
   }
 
 /// PID Control
