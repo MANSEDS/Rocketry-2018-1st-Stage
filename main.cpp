@@ -61,10 +61,68 @@ double distance(double lat1, double lon1, double lat2, double lon2) {
 /// Inputs IMU & GPS/GLONASS data
 /// Output filter_data object 
 
-/// Difference function
+/// Difference function - rudimentary code
 /// Oscar
 /// Input location data (initially GPS & GLONASS, eventually filtered_data), target location
 /// Output PI_error object 
+// obj currently undefined - could be a lat/long location object
+class location
+{
+public:
+    location(int givenLat, int givenLongi)
+    {
+        lat = givenLat;
+        longi = givenLongi;
+    }
+    getLat()
+    {
+        return lat;
+    }
+    getLongi()
+    {
+        return longi;
+    }
+    setLat(int givenLat)
+    {
+        lat = givenLat;
+    }
+    setLongi(int givenLongi)
+    {
+        longi = givenLongi;
+    }
+  private:
+    int lat;
+    int longi;
+  };
+
+  location difference(location GPSLocation, location glonassLocation, location IMULocation, location targetLocation)
+  {
+    location ourLocation = new location (0, 0);
+    // Could 'hard code' in a target location instead
+    // obj targetLocation = new obj(ourLat, ourLong);
+    // Before IMU arrives
+    if (IMU.getLat() == 0)
+    {
+        ourLocation.setLat((glonassLocation.getLat() + GPSLocation.getLat()) / 2);
+        ourLocation.setLongi((GPSLocation.getLongi() + glonassLocation.getLongi()) / 2);
+    }
+    // For when GPS cuts out
+    else if (GPSLocation.getLat() == 0)
+    {
+        ourLocation.setLat() = (glonassLocation.getLat() + IMULocation.getLat()) / 2;
+        ourLocation.setLongi() = (glonassLocation.getLongi() + IMULocation.getLongi()) / 2;
+    }
+    else
+    {
+        ourLocation.setLat((GPSLocation.getLat() + glonassLocation.getLat() + IMULocation.getLat()) / 3);
+        ourLocation.setLongi((GPSLocation.getLong() + glonassLocation.getLongi() + IMULocation.getLongi()) / 3);
+    }
+    // This is our positional error
+    location difference = new location(targetLocation.lat - ourLocation.lat, targetLocation.longi - ourLocation.longi);
+
+    /* To get velocity error, multiple routes. Potentially: sample two differences over an interval (yet to decide its length)
+    and subtract. Constructor Pi_Error object as per location class' layout.*/
+  }
 
 /// PID Control
 /// 
