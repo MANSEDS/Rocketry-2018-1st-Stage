@@ -95,33 +95,30 @@ public:
     int longi;
   };
 
-  location difference(location GPSLocation, location glonassLocation, location IMULocation, location targetLocation)
+  location difference(location GPSLocation, location glonassLocation, location targetLocation, double IMUacceleration)
   {
     location ourLocation = new location (0, 0);
     // Could 'hard code' in a target location instead
     // obj targetLocation = new obj(ourLat, ourLong);
     // Before IMU arrives
-    if (IMU.getLat() == 0)
-    {
-        ourLocation.setLat((glonassLocation.getLat() + GPSLocation.getLat()) / 2);
-        ourLocation.setLongi((GPSLocation.getLongi() + glonassLocation.getLongi()) / 2);
-    }
     // For when GPS cuts out
-    else if (GPSLocation.getLat() == 0)
+    if (GPSLocation.getLat() == 0)
     {
         ourLocation.setLat() = (glonassLocation.getLat() + IMULocation.getLat()) / 2;
         ourLocation.setLongi() = (glonassLocation.getLongi() + IMULocation.getLongi()) / 2;
     }
     else
     {
-        ourLocation.setLat((GPSLocation.getLat() + glonassLocation.getLat() + IMULocation.getLat()) / 3);
-        ourLocation.setLongi((GPSLocation.getLong() + glonassLocation.getLongi() + IMULocation.getLongi()) / 3);
+        ourLocation.setLat((GPSLocation.getLat() + glonassLocation.getLat()) / 2);
+        ourLocation.setLongi((GPSLocation.getLong() + glonassLocation.getLongi()) / 2);
     }
     // This is our positional error
     location difference = new location(targetLocation.lat - ourLocation.lat, targetLocation.longi - ourLocation.longi);
 
     /* To get velocity error, multiple routes. Potentially: sample two differences over an interval (yet to decide its length)
     and subtract. Constructor Pi_Error object as per location class' layout.*/
+    double rawDifference = sqrt (pow(difference.lat, 2) + pow(difference.longi, 2));
+    double velocityError = 2 * IMUAcceleration * rawDifference;
   }
 
 /// PID Control
