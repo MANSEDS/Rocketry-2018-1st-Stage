@@ -39,5 +39,11 @@ public:
 		container_[top_ >> shift_].~T(); // Call the objects destructor
 		top_ -= increment_; // Deincrement as this is a LIFO queue
 	}
-	// Define an overload for the accessor operator []
+	T & operator [] (uint32_t position) // Definition of the access operator []
+	{
+		// Convert the position provided, i.e. 1,2,3,4,... , into the corresponding 'counting' position.
+		position = top_ - position * increment_; // Deincrement as this is a LIFO queue
+		return container_[position >> shift_];
+	}
+};
 };
