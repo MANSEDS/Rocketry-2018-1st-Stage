@@ -40,12 +40,4 @@ public:
 		top_ -= increment_; // Deincrement as this is a LIFO queue
 	}
 	// Define an overload for the accessor operator []
-	T & operator [] (uint32_t position)
-	{
-		std::cout << "pos before = " << position << std::endl;
-		position << shift_;
-		position = top_ - position;
-		std::cout << "pos after = " << position << std::endl;
-		return container_[position >> shift_];
-	}
 };
