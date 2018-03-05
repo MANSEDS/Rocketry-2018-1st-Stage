@@ -20,7 +20,7 @@ private:
 	T * container_;
 	uint32_t top_, shift_, increment_;
 public:
-	f_ring_stack() : top_{ 0 }, container_ { nullptr }, top_{ 0 }, shift_{ 0 }, increment_{ 0 } {}
+	f_ring_stack() : top_{ 0 }, container_ { nullptr }, shift_{ 0 }, increment_{ 0 } {}
 	f_ring_stack(unsigned bits) : shift_{ uint32_t(32 - bits) }, increment_{ uint32_t(pow(2, 32) / pow(2, bits)) }, container_{ new T[uint32_t(pow(2, bits))] } {}
 	~f_ring_stack() 
 	{
@@ -36,7 +36,7 @@ public:
 	// emplace?
 	void pop()
 	{
-		container_[top_ >> shift_].~T(); // Call the objects destructor
+		//container_[top_ >> shift_].~T(); // Call the objects destructor
 		top_ -= increment_; // Deincrement as this is a LIFO queue
 	}
 	T & operator [] (uint32_t position) // Definition of the access operator []
