@@ -8,11 +8,19 @@
     Program is split up as follows:
     
     1. Initialisation (Prior to launch)
+        > Initialise time
         > Initialise I2C
         > Initialise IMUs
         > Initialise GPS module
+            ~ Check that the target location is within a reasonable distance of current (launch location)
         > Open/create data files
         > Initialise stacks
+        > Initialise thread pool and assign threads. Need threads for: (Look into whether or not to set affinity for each thread to lock it to a certain processor)
+            - Polling sensors (Throughout the flight)
+            - Saving data (Throughout the flight)
+            - Monitoring of the flight (Throughout flight - Tasks to be split between main thread and another spawned thread)
+            - Controlling fin actuators (Upper descent)
+            - Controlling fin actuators and deploying legs (Lower descent)
         > Open up wireless and Listen for launch command
 
     2. Launch Command
@@ -58,35 +66,158 @@
     7. Save data
 
     8. Terminate program
+
+    TO DO: (BY NO MEANS A COMPLETE LIST!)
+        > define abort functions (different aborts depending on what part of the flight)
+
+    Notes:
+        > Define functions which cause an action, i.e. deploy_fins() as bool functions which return 
+          true if executed successfully and false otherwise! Allows easier abort control and error logging.
+        > Log all successful and unsuccessful actions in the log file in the format 
+          log_file << current_time() << ": COMMENT" << std::endl;
+        > Use easy to understand variable and function names. The rule of thumb is that the name is 
+          unsuitable if you ever have to explain the name either in person or by a comment
 */
 
-// Import header files and necessary libraries
+// Import necessary libraries
 
-# include <thread>
+#include <thread> // for std::thread and other  multi-threading functions
+#include <fstream> // For saving to files
+#include <chrono> // For keep track of time
 
+// Import header files
 
+#include "global_variables.h"
 
-bool initialise_stacks()
+// Initialise log and data files to be saved to
+
+std::ofstream log_file{ "log.txt" }; 
+log_file << "Time / ms       |      Log" << std::endl << std::endl;
+std::ofstream acceleration_file{ "acceleration_data.txt" }
+std::ofstream GPS_file{ "GPS_data.txt" }
+
+using t_now = std::chrono::high_resolution_clock::now();
+auto t_0 = t_now; // Define as a global variable
+double current_time() // returns the current time in ms from the start time t_0 as a double
 {
-    
+    return std::chrono::duration<double, std::milli>(t_now - t_0).count()
 }
 
+bool initialise_stacks()
+// Initialises the stacks' size and catches any memory allocation faults
+// Fills the stacks so that they are fully initilised (e.g. stack.size() == stack.max_size()). 
+// This is to ensure that non of the elements are undefined.
+{
+    try
+    {
+        acceleration = f_ring_stack<double>{ 8 }; // Initialise stacks 
+    }
+    catch(/*memory allocation problem*/)
+    {
+        return false;
+    }
+    for(int i=0; i < acceleration.max_size(); i++)
+    {
+        read_IMUs(); 
+    }
+    return true;
+}
 
+/*
+MULTI-THREADING CONTROL
+
+A thread pool is initialised at the start of the program which is then assigned to run certain functions.
+Some of the functions, including the sensor reading and data saving functions, run continously via a while(true) loop which is interupted 
+when necessary via a terminate command issued changing a global boolean to false. Can look into using thread termination commands that are
+platform specific for the raspberry pi in the future to speed things up.
+Need threads for: (Look into whether or not to set affinity for each thread to lock it to a certain processor)
+            - Polling sensors (Throughout the flight)
+            - Saving data (Throughout the flight)
+            - Monitoring of the flight (Throughout flight - Tasks to be split between main thread and another spawned thread)
+            - Controlling fin actuators (Upper descent)
+            - Controlling fin actuators and deploying legs (Lower descent)
+Affinity: https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/
+Setting affinity is system dependent, define once final operating has been set!
+*/
+
+bool is_reading_sensors{ true }; // Global variable which can be changed in order to end the while loop within the thread
+void read_sensors() // function placed within a thread to read sensor data and place them on their associated stacks
+{
+    log_file << current_time() << ": Began reading sensors" << std::endl;
+    while(is_reading_sensors) 
+    {
+        read_IMUs(); 
+        read_GPS();
+    }
+    log_file << current_time() << ": Stopped reading sensors" << std::endl;
+}
+
+bool is_saving_data{ true };
+void save_data_to_file() // function placed within a thread to save sensor data to various files
+{
+    log_file << current_time() << ": Began saving data to files." << std::endl;
+    while(is_saving_data)
+    {
+        // Save IMU data to file
+        // Save GPS data to file
+    }
+    log_file << current_time() << ": Stopped saving data to files." << std::endl;
+}
 
 int main()
 {
     // 1. Initialisation
 
-    // Initialise IMUS and GPS
-    initialise_I2C();
-    initialise_IMUS();
-    initialise_GPS();
+    // Initialise time
+    t_0 = t_now; // Reset the start time
+
+    // Initialise I2C, IMUS and GPS
+    if(initialise_I2C())
+    {
+        log_file << current_time() << ": Initialised I2C successfully" << std::endl;
+    }
+    else
+    {
+        log_file << current_time() << ": ERROR! I2C initialisation unsuccessful" << std::endl;
+        pre_launch_abort();
+    }
+    if(initialise_IMUs())
+    {
+        log_file << current_time() << ": Initialised IMUs successfully" << std::endl;
+    }
+    else
+    {
+        log_file << current_time() << ": ERROR! I2C initialisation unsuccessful" << std::endl;
+        pre_launch_abort();
+    }
+    if(initialise_GPS())
+    {
+        log_file << current_time() << ": Initialised GPS successfully" << std::endl;
+    }
+    else
+    {
+        log_file << current_time() << ": ERROR! I2C initialisation unsuccessful" << std::endl;
+        pre_launch_abort();
+    }
+
+    // Create thread pool and initialise threads
 
     // Open data files to save telemetry data to throughout the flight
+    // Do we want to read acceleration and GPS continously into files before the launch??
 
     // If there is a failure is previously saved data actually saved??
 
-    // Initialise stack and fill with data
+    // Initialise stacks and fill with data
+
+    if(initialise_stacks())
+    {
+        log_file << current_time() << ": Stacks successfully initialised" << std::endl;
+    }
+    else
+    {
+        log_file << current_time() << ": ERROR! Stack initialisation unsuccessful, memory allocation exception" << std::endl;
+        pre_launch_abort();
+    }
 
     bool is_initialising{ true };
     while(is_initialising)
@@ -98,7 +229,9 @@ int main()
     // 2. Launch Command
 
     // Close wireless transmissions
+    log_file << current_time() << ": Launch command recieved" << std::endl;
     fire_motor();
+    
 
     // 3. Ascent monitoring
 
