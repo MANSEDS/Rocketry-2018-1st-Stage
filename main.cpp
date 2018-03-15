@@ -68,11 +68,23 @@
     8. Terminate program
 
     TO DO: (BY NO MEANS A COMPLETE LIST!)
+        Add your name to the google drive next to the tasks you are completing: https://docs.google.com/spreadsheets/d/18tTD7q6DT0AlY1_XBud34gNhlpI3fMTlMXtsfzcRgaI/edit?usp=sharing
         > define abort functions (different aborts depending on what part of the flight)
+        > Reading GPS data
+        > Logginf GPS data and finding the average position. Use a Kalman filter.
+        > Reading IMU data
+        > Logging IMU data and finding average acceleration and logging this. Look into cross validation with other data sources of acceleration.
+        > Initialisation of I2C
+        > Thread Pool
+        > Custom stacks and queues (in testing phase currently)
+        > Launch detection (for use when using a solid motor and to double check hybrid has worked when the hybrid motor is used)7
+        > Detecting Appogee
+        > Detecting when landing height has been reached. Which is about 10 m. Add this variable to global_variables.h so that it can be easily changed.
+        > Detecting when the rocket has landed. 
 
     Notes:
         > Define functions which cause an action, i.e. deploy_fins() as bool functions which return 
-          true if executed successfully and false otherwise! Allows easier abort control and error logging.
+          true if executed successfully and false otherwise! Allows for easier abort control and error logging.
         > Log all successful and unsuccessful actions in the log file in the format 
           log_file << current_time() << ": COMMENT" << std::endl;
         > Use easy to understand variable and function names. The rule of thumb is that the name is 
@@ -85,7 +97,7 @@
 #include <fstream> // For saving to files
 #include <chrono> // For keep track of time
 
-// Import header files
+// Import header files, please add any relevant header files here
 
 #include "global_variables.h"
 
